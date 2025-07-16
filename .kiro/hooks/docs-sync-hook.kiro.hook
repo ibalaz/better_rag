@@ -1,0 +1,36 @@
+{
+  "enabled": true,
+  "name": "Documentation Sync",
+  "description": "Listens to all source files in the repository and updates documentation in README.md or /documents folder when changes occur",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "backend/*.py",
+      "frontend/*.ts",
+      "frontend/*.tsx",
+      "frontend/*.js",
+      "frontend/*.jsx",
+      "frontend/components/**/*.ts",
+      "frontend/components/**/*.tsx",
+      "frontend/pages/**/*.ts",
+      "frontend/pages/**/*.tsx",
+      "frontend/services/**/*.ts",
+      "frontend/store/**/*.ts",
+      "backend/services/**/*.py",
+      "backend/models.py",
+      "backend/main.py",
+      "backend/config.py",
+      "backend/database.py",
+      "backend/tasks.py",
+      "package.json",
+      "requirements.txt",
+      "tsconfig.json",
+      "next.config.js"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Source code files have been modified in this repository. Please review the changes and update the documentation accordingly. Update the README.md file and/or files in the /documents folder to reflect any new features, API changes, configuration updates, or architectural modifications. Ensure the documentation stays current with the codebase changes."
+  }
+}
