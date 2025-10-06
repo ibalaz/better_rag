@@ -231,7 +231,7 @@ WITH (lists = 100);
 - `POST /api/query/feedback` - Submit feedback on response
 
 ### Category Management
-- `GET /api/categories` - List all categories
+- `GET /api/categories` - List all categories (dynamically from document folders)
 - `POST /api/categories` - Create new category
 - `GET /api/categories/{id}/graph` - Get category knowledge graph
 

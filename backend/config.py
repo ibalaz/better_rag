@@ -34,8 +34,8 @@ class Settings(BaseSettings):
     CHUNK_OVERLAP: int = 50
     
     # RAG settings
-    MAX_CHUNKS_PER_QUERY: int = 10
-    SIMILARITY_THRESHOLD: float = 0.7
+    MAX_CHUNKS_PER_QUERY: int = 3
+    SIMILARITY_THRESHOLD: float = 0.8
     
     class Config:
         env_file = ".env"

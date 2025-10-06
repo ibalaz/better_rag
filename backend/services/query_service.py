@@ -46,7 +46,8 @@ class QueryService:
                         "document_id": str(chunk["document_id"]),
                         "filename": chunk["filename"],
                         "chunk_index": chunk["chunk_index"],
-                        "similarity": chunk["similarity"]
+                        "similarity": chunk["similarity"],
+                        "content": chunk["content"]
                     }
                     for chunk in relevant_chunks
                 ],
@@ -140,19 +141,13 @@ class QueryService:
             
             # System prompts
             system_prompts = {
-                'hr': """Ti si AI asistent koji pomaže korisnicima pronaći informacije u dokumentima. 
-                Odgovori na hrvatskom jeziku na temelju priloženog konteksta. 
-                Ako informacija nije dostupna u kontekstu, reci da ne znaš odgovor.
-                Uvijek navedi iz kojeg dokumenta dolaze informacije.""",
-                'en': """You are an AI assistant helping users find information in documents. 
-                Respond in English based on the provided context. 
-                If information is not available in the context, say you don't know the answer.
-                Always cite which document the information comes from."""
+                'hr': """Ti si AI asistent u Zagrebačkoj banci, sve odgovore daješ kao da te klijenti pitaju iz perspektive Zagrebačke banke. Nemoj izmišljati odgovore, odgovore davaj samo iz konteksta koji ti je dan. Također nemoj davati previše informacije učini odgovore što točnijima i sažetijima. Ako odgovor ne možeš naći u danom kontenstu odgovori sa "Nisam mogao pronaći odgovor." """,
+                'en': """You are an AI assistant at Zagrebačka banka, provide all answers as if clients are asking you from the perspective of Zagrebačka banka. Don't make up answers, only provide answers from the given context. Also don't give too much information, make answers as accurate and concise as possible. If you cannot find the answer in the given context, respond with "I could not find the answer." """
             }
             
             # Generate response
             response = self.groq_client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama3-8b-8192",
                 messages=[
                     {"role": "system", "content": system_prompts.get(language, system_prompts['hr'])},
                     {"role": "user", "content": f"Kontekst:\n{context}\n\nPitanje: {query}"}
@@ -182,19 +177,13 @@ class QueryService:
             
             # System prompts
             system_prompts = {
-                'hr': """Ti si AI asistent koji pomaže korisnicima pronaći informacije u dokumentima. 
-                Odgovori na hrvatskom jeziku na temelju priloženog konteksta. 
-                Ako informacija nije dostupna u kontekstu, reci da ne znaš odgovor.
-                Uvijek navedi iz kojeg dokumenta dolaze informacije.""",
-                'en': """You are an AI assistant helping users find information in documents. 
-                Respond in English based on the provided context. 
-                If information is not available in the context, say you don't know the answer.
-                Always cite which document the information comes from."""
+                'hr': """Ti si AI asistent u Zagrebačkoj banci, sve odgovore daješ kao da te klijenti pitaju iz perspektive Zagrebačke banke. Nemoj izmišljati odgovore, odgovore davaj samo iz konteksta koji ti je dan. Također nemoj davati previše informacije učini odgovore što točnijima i sažetijima. Ako odgovor ne možeš naći u danom kontenstu odgovori sa "Nisam mogao pronaći odgovor." """,
+                'en': """You are an AI assistant at Zagrebačka banka, provide all answers as if clients are asking you from the perspective of Zagrebačka banka. Don't make up answers, only provide answers from the given context. Also don't give too much information, make answers as accurate and concise as possible. If you cannot find the answer in the given context, respond with "I could not find the answer." """
             }
             
             # Stream response
             stream = self.groq_client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama3-8b-8192",
                 messages=[
                     {"role": "system", "content": system_prompts.get(language, system_prompts['hr'])},
                     {"role": "user", "content": f"Kontekst:\n{context}\n\nPitanje: {query}"}

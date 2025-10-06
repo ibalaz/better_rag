@@ -28,6 +28,8 @@ import {
 import ChatInterface from '../components/ChatInterface'
 import DocumentUpload from '../components/DocumentUpload'
 import DocumentList from '../components/DocumentList'
+import SourcesPanel from '../components/SourcesPanel'
+import ConversationHistory from '../components/ConversationHistory'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { setLanguage } from '../store/slices/appSlice'
 
@@ -114,8 +116,26 @@ export default function Home() {
         </Drawer>
 
         <Container maxWidth="xl" sx={{ mt: 2, mb: 2 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
+          <Grid container spacing={2}>
+            {/* Conversation History - Left Panel */}
+            <Grid item xs={12} md={3}>
+              <Paper 
+                elevation={3}
+                sx={{ 
+                  p: 2, 
+                  height: 'calc(100vh - 150px)',
+                  backgroundColor: 'background.paper',
+                  borderRadius: 2,
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  overflow: 'hidden'
+                }}
+              >
+                <ConversationHistory />
+              </Paper>
+            </Grid>
+            
+            {/* Chat Interface - Center Panel */}
+            <Grid item xs={12} md={6}>
               <Paper 
                 elevation={3}
                 sx={{ 
@@ -127,6 +147,23 @@ export default function Home() {
                 }}
               >
                 <ChatInterface />
+              </Paper>
+            </Grid>
+            
+            {/* Sources Panel - Right Panel (Smaller) */}
+            <Grid item xs={12} md={3}>
+              <Paper 
+                elevation={3}
+                sx={{ 
+                  p: 2, 
+                  height: 'calc(100vh - 150px)',
+                  backgroundColor: 'background.paper',
+                  borderRadius: 2,
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  overflow: 'auto'
+                }}
+              >
+                <SourcesPanel />
               </Paper>
             </Grid>
           </Grid>

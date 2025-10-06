@@ -167,9 +167,33 @@ async def submit_feedback(
 # Category endpoints
 @app.get("/api/categories")
 async def list_categories(db = Depends(get_db)):
-    """List all categories"""
-    categories = db.query(Category).all()
-    return categories
+    """List all categories based on actual document folders"""
+    import os
+    from config import settings
+    
+    # Get categories from actual folders
+    folder_categories = []
+    if os.path.exists(settings.DOCUMENTS_PATH):
+        for item in os.listdir(settings.DOCUMENTS_PATH):
+            item_path = os.path.join(settings.DOCUMENTS_PATH, item)
+            if os.path.isdir(item_path) and item != "general":
+                # Check if there are documents in this folder
+                has_documents = any(
+                    f.lower().endswith(('.pdf', '.docx', '.txt', '.md'))
+                    for f in os.listdir(item_path)
+                )
+                if has_documents:
+                    folder_categories.append({
+                        "id": item,
+                        "name": item,
+                        "name_hr": item.replace("_", " "),
+                        "name_en": item.replace("_", " "),
+                        "description": f"{item} documents",
+                        "created_at": None,
+                        "graph_id": None
+                    })
+    
+    return folder_categories
 
 @app.post("/api/categories")
 async def create_category(

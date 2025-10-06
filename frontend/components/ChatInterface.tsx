@@ -6,9 +6,7 @@ import {
   Paper,
   Typography,
   CircularProgress,
-  Chip,
   IconButton,
-  Divider,
 } from '@mui/material'
 import {
   Send as SendIcon,
@@ -19,15 +17,18 @@ import {
 import ReactMarkdown from 'react-markdown'
 
 import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { addMessage, setIsTyping, setCurrentQuery, clearMessages } from '../store/slices/chatSlice'
+import { addMessageToCurrent, setCurrentTyping, clearCurrentConversation } from '../store/slices/conversationSlice'
 import { queryDocuments } from '../services/api'
 
 const ChatInterface: React.FC = () => {
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const dispatch = useAppDispatch()
-  const { messages, isTyping } = useAppSelector((state) => state.chat)
+  const { currentConversation } = useAppSelector((state) => state.conversation)
   const { language, category } = useAppSelector((state) => state.app)
+  
+  const messages = currentConversation.messages
+  const isTyping = currentConversation.isTyping
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -48,9 +49,8 @@ const ChatInterface: React.FC = () => {
       timestamp: new Date(),
     }
 
-    dispatch(addMessage(userMessage))
-    dispatch(setCurrentQuery(input.trim()))
-    dispatch(setIsTyping(true))
+    dispatch(addMessageToCurrent(userMessage))
+    dispatch(setCurrentTyping(true))
     setInput('')
 
     try {
@@ -63,8 +63,7 @@ const ChatInterface: React.FC = () => {
         timestamp: new Date(),
         sources: response.sources,
       }
-
-      dispatch(addMessage(assistantMessage))
+      dispatch(addMessageToCurrent(assistantMessage))
     } catch (error) {
       const errorMessage = {
         id: (Date.now() + 1).toString(),
@@ -72,14 +71,14 @@ const ChatInterface: React.FC = () => {
         sender: 'assistant' as const,
         timestamp: new Date(),
       }
-      dispatch(addMessage(errorMessage))
+      dispatch(addMessageToCurrent(errorMessage))
     } finally {
-      dispatch(setIsTyping(false))
+      dispatch(setCurrentTyping(false))
     }
   }
 
   const handleClear = () => {
-    dispatch(clearMessages())
+    dispatch(clearCurrentConversation())
   }
 
   return (
@@ -146,7 +145,7 @@ const ChatInterface: React.FC = () => {
               sx={{
                 p: 3,
                 backgroundColor: message.sender === 'user' 
-                  ? 'primary.dark' 
+                  ? 'rgba(25, 118, 210, 0.1)' 
                   : 'background.paper',
                 border: message.sender === 'user' 
                   ? '1px solid rgba(144, 202, 249, 0.3)'
@@ -174,29 +173,6 @@ const ChatInterface: React.FC = () => {
                   <Box sx={{ '& p': { margin: 0, lineHeight: 1.6 } }}>
                     <ReactMarkdown>{message.text}</ReactMarkdown>
                   </Box>
-                  
-                  {message.sources && message.sources.length > 0 && (
-                    <Box sx={{ mt: 2 }}>
-                      <Divider sx={{ mb: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-                      <Typography variant="caption" sx={{ mb: 1, display: 'block', fontWeight: 600 }}>
-                        {language === 'hr' ? '📚 Izvori:' : '📚 Sources:'}
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {message.sources.map((source, index) => (
-                          <Chip
-                            key={index}
-                            label={`${source.filename} (${Math.round(source.similarity * 100)}%)`}
-                            size="small"
-                            variant="outlined"
-                            sx={{ 
-                              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                              borderColor: 'rgba(255, 255, 255, 0.2)'
-                            }}
-                          />
-                        ))}
-                      </Box>
-                    </Box>
-                  )}
                 </Box>
               </Box>
             </Paper>
@@ -251,6 +227,12 @@ const ChatInterface: React.FC = () => {
           fullWidth
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              handleSubmit(e)
+            }
+          }}
           placeholder={language === 'hr' ? 'Postavite pitanje...' : 'Ask a question...'}
           disabled={isTyping}
           multiline
@@ -278,8 +260,7 @@ const ChatInterface: React.FC = () => {
           sx={{ 
             minWidth: 'auto', 
             px: 3,
-            height: 'fit-content',
-            alignSelf: 'flex-end'
+            alignSelf: 'stretch'
           }}
         >
           <SendIcon />

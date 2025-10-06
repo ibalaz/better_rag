@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   FormControl,
@@ -14,17 +14,31 @@ import { useDropzone } from 'react-dropzone'
 
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { setUploading, setError, addDocument } from '../store/slices/documentsSlice'
-import { uploadDocument } from '../services/api'
+import { uploadDocument, fetchCategories } from '../services/api'
 
 const DocumentUpload: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState('general')
+  const [selectedCategory, setSelectedCategory] = useState('CC_AI')
   const [selectedLanguage, setSelectedLanguage] = useState('hr')
+  const [categories, setCategories] = useState<any[]>([])
   const dispatch = useAppDispatch()
   const { uploading, error } = useAppSelector((state) => state.documents)
   const { language } = useAppSelector((state) => state.app)
   
-  // Use actual folder names from documents directory
-  const categories = ['CC_AI', 'EU_ACTS', 'general']
+  useEffect(() => {
+    loadCategories()
+  }, [])
+
+  const loadCategories = async () => {
+    try {
+      const cats = await fetchCategories()
+      setCategories(cats)
+      if (cats.length > 0 && !selectedCategory) {
+        setSelectedCategory(cats[0].name)
+      }
+    } catch (error) {
+      console.error('Failed to load categories:', error)
+    }
+  }
 
   const onDrop = async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return
@@ -92,8 +106,8 @@ const DocumentUpload: React.FC = () => {
             disabled={uploading}
           >
             {categories.map((category) => (
-              <MenuItem key={category} value={category}>
-                {category}
+              <MenuItem key={category.id} value={category.name}>
+                {language === 'hr' ? category.name_hr : category.name_en}
               </MenuItem>
             ))}
           </Select>
